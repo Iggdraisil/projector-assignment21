@@ -41,6 +41,8 @@
  ![image](https://user-images.githubusercontent.com/44341837/236877855-18623ada-e248-4719-823a-9eaf288c3ac0.png)
 
 ## Removal of column:
-   - Query OK, data now is incosisstent
+   1. Run `DELETE * from user where id < 1000;` on slave1;
+   2. Result: Query OK.
+   3. Even no exceptions or warnings in logs.
 
 
