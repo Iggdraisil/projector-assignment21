@@ -1,0 +1,71 @@
+version: "3"
+
+services:
+
+  mysql-master:
+    build: ./mysql-master
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'mydb'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_ROOT_PASSWORD: 'password'
+    networks:
+      assign17:
+        ipv4_address: 20.20.20.5
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - mysql-m:/var/lib/mysql:rw
+      - mysql-master-log:/var/log/mysql:rw
+
+  mysql-slave1:
+    build: ./mysql-slave1
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'mydb'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_ROOT_PASSWORD: 'password'
+    networks:
+      assign17:
+        ipv4_address: 20.20.20.4
+    ports:
+      - '3307:3306'
+    volumes:
+      - mysql-s1:/var/lib/mysql:rw
+      - mysql-slave1-log:/var/log/mysql:rw
+    links:
+      - mysql-master
+
+  mysql-slave2:
+    build: ./mysql-slave2
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'mydb'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_ROOT_PASSWORD: 'password'
+    networks:
+      assign17:
+        ipv4_address: 20.20.20.3
+    ports:
+      - '3308:3306'
+    volumes:
+      - mysql-s2:/var/lib/mysql:rw
+      - mysql-slave2-log:/var/log/mysql:rw
+    links:
+      - mysql-master
+
+networks:
+  assign17:
+    external: true
+volumes:
+  mysql-m:
+  mysql-master-log:
+  mysql-s1:
+  mysql-slave1-log:
+  mysql-s2:
+  mysql-slave2-log:
