@@ -4,11 +4,10 @@ import (
 	//  "bytes"
 	"database/sql"
 	"fmt"
-	"github.com/gin-gonic/gin"
+        "time"
 	"github.com/go-faker/faker/v4"
 	// "github.com/lib/pq"
-		_ "github.com/go-sql-driver/mysql"
-	"net/http"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func checkErr(err error) {
@@ -20,7 +19,6 @@ func checkErr(err error) {
 }
 
 func main() {
-	gin.SetMode(gin.ReleaseMode)
 	db, err := sql.Open("mysql", "user:password@tcp(127.0.0.1:3306)/mydb")
 	checkErr(err)
 	defer func(db *sql.DB) {
@@ -33,43 +31,13 @@ func main() {
 	checkErr(err)
 	db.SetMaxIdleConns(100)
 	db.SetMaxOpenConns(5000)
-
-	router := gin.New()
-	router.Use(gin.Recovery())
         db.Exec("create table if not exists user (    id serial primary key,    name varchar(100),    birthdate DATE,    email varchar(100),    state varchar(100),    city varchar(100))")
-	router.POST("/person", func(c *gin.Context) {
+	for {
 		address := faker.GetRealAddress()
-		_, err := db.Exec("insert into user (`name`, `birthdate`, `email`, `state`, `city`) values (?,?,?,?,?)",
+		db.Exec("insert into user (`name`, `birthdate`, `email`, `state`, `city`) values (?,?,?,?,?)",
 			faker.Name(), faker.Date(), faker.Email(), address.State, address.City,
 		)
-		if err != nil {
-			c.JSON(500, gin.H{
-				"user":  nil,
-				"count": 0,
-			})
-			fmt.Println(err)
-		} else {
-			c.JSON(http.StatusOK, gin.H{
-				"count": 1,
-			})
-		}
-	})
-	router.GET("/person", func(c *gin.Context) {
-		_, err := db.Exec("select * from user order by RAND() LIMIT 1")
-		if err != nil {
-			c.JSON(500, gin.H{
-				"user":  nil,
-				"count": 0,
-			})
-			fmt.Println(err)
-		} else {
-			c.JSON(http.StatusOK, gin.H{
-				"count": 1,
-			})
-		}
-	})
-	err = router.Run(":3000")
-	if err != nil {
-		panic(err)
+		time.Sleep(time.Second/20)
+
 	}
 }
